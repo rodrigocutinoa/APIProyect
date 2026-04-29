@@ -5,6 +5,7 @@ from bson import ObjectId
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from .db import get_collection
 from .models import (
@@ -17,6 +18,7 @@ from .models import (
 )
 
 app = FastAPI(title="APIProyect", version="0.2.0")
+app.mount("/ui", StaticFiles(directory="static", html=True), name="static")
 
 PROJECT_COLLECTION = "projects"
 TASK_COLLECTION = "tasks"

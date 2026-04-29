@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APIProyect UI</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>APIProyect</h1>
+    <p>Gestiona proyectos y tareas desde una interfaz simple.</p>
+  </header>
+
+  <main>
+    <section id="login-screen" class="login-screen">
+      <div class="login-card">
+        <h2>Iniciar sesión</h2>
+        <p>Ingresa tus credenciales para acceder a los proyectos.</p>
+        <form id="login-form">
+          <label>
+            Usuario
+            <input type="email" id="login-user" required placeholder="rodrigo.cutino@inacapmail.cl" />
+          </label>
+          <label>
+            Contraseña
+            <input type="password" id="login-password" required placeholder="Contraseña" />
+          </label>
+          <button type="submit">Ingresar</button>
+          <p id="login-error" class="login-error"></p>
+        </form>
+      </div>
+    </section>
+
+    <section id="app-screen" class="app-screen hidden">
+      <div class="app-actions">
+        <span>Conectado como <strong>rodrigo.cutino@inacapmail.cl</strong></span>
+        <button id="logout-button">Cerrar sesión</button>
+      </div>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Proyectos</h2>
+          <button id="refresh-projects">Actualizar</button>
+        </div>
+
+        <div class="panel-content">
+          <table id="projects-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Creado</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <form id="project-form" class="form-card">
+          <h3>Crear proyecto</h3>
+          <label>
+            Nombre
+            <input type="text" id="project-name" required />
+          </label>
+          <label>
+            Descripción
+            <textarea id="project-description"></textarea>
+          </label>
+          <label>
+            Estado
+            <select id="project-status">
+              <option value="active">active</option>
+              <option value="planning">planning</option>
+              <option value="completed">completed</option>
+            </select>
+          </label>
+          <button type="submit">Crear proyecto</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Tareas</h2>
+          <button id="refresh-tasks">Actualizar</button>
+        </div>
+
+        <div class="filters">
+          <label>
+            Proyecto
+            <select id="task-project-filter">
+              <option value="">Todos</option>
+            </select>
+          </label>
+          <label>
+            Estado
+            <select id="task-status-filter">
+              <option value="">Todos</option>
+              <option value="pending">pending</option>
+              <option value="in_progress">in_progress</option>
+              <option value="active">active</option>
+              <option value="completed">completed</option>
+            </select>
+          </label>
+          <label>
+            Título
+            <input type="text" id="task-title-filter" placeholder="Buscar título" />
+          </label>
+          <button id="apply-filters">Filtrar</button>
+        </div>
+
+        <div class="panel-content">
+          <table id="tasks-table">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Proyecto</th>
+                <th>Estado</th>
+                <th>Vencimiento</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <form id="task-form" class="form-card">
+          <h3>Crear tarea</h3>
+          <label>
+            Proyecto
+            <select id="task-project"></select>
+          </label>
+          <label>
+            Título
+            <input type="text" id="task-title" required />
+          </label>
+          <label>
+            Descripción
+            <textarea id="task-description"></textarea>
+          </label>
+          <label>
+            Estado
+            <select id="task-status">
+              <option value="pending">pending</option>
+              <option value="in_progress">in_progress</option>
+              <option value="active">active</option>
+              <option value="completed">completed</option>
+            </select>
+          </label>
+          <label>
+            Fecha de vencimiento
+            <input type="datetime-local" id="task-due-date" />
+          </label>
+          <label>
+            Metadata (JSON)
+            <textarea id="task-metadata" placeholder='{"assigned_to":"user1"}'></textarea>
+          </label>
+          <button type="submit">Crear tarea</button>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <div id="message" class="message"></div>
+
+  <script>
+    const apiBase = '/api/v1';
+    const validUser = 'rodrigo.cutino@inacapmail.cl';
+    const validPassword = 'inacap2026';
+    const loginScreen = document.getElementById('login-screen');
+    const appScreen = document.getElementById('app-screen');
+    const loginError = document.getElementById('login-error');
+    const logoutButton = document.getElementById('logout-button');
+    const projectTableBody = document.querySelector('#projects-table tbody');
+    const taskTableBody = document.querySelector('#tasks-table tbody');
+    const projectSelect = document.querySelector('#task-project');
+    const projectFilterSelect = document.querySelector('#task-project-filter');
+    const messageEl = document.querySelector('#message');
+
+    const showMessage = (text, type = 'success') => {
+      messageEl.textContent = text;
+      messageEl.className = `message ${type}`;
+      setTimeout(() => { messageEl.textContent = ''; messageEl.className = 'message'; }, 4000);
+    };
+
+    const setAuth = (isAuthenticated) => {
+      localStorage.setItem('apiProyectAuth', isAuthenticated ? 'true' : 'false');
+      loginScreen.classList.toggle('hidden', isAuthenticated);
+      appScreen.classList.toggle('hidden', !isAuthenticated);
+    };
+
+    const isAuthenticated = () => localStorage.getItem('apiProyectAuth') === 'true';
+
+    async function fetchJson(path, options = {}) {
+      const response = await fetch(`${apiBase}${path}`, options);
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ detail: response.statusText }));
+        throw new Error(error.detail || response.statusText);
+      }
+      return response.json();
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      return new Date(dateString).toLocaleString('es-CL');
+    }
+
+    async function loadProjects() {
+      const projects = await fetchJson('/projects');
+      projectTableBody.innerHTML = projects.map(p => `
+        <tr>
+          <td>${p.name}</td>
+          <td>${p.description || ''}</td>
+          <td>${p.status}</td>
+          <td>${formatDate(p.created_at)}</td>
+        </tr>
+      `).join('');
+
+      const options = projects.map(p => `<option value="${p._id}">${p.name}</option>`).join('');
+      projectSelect.innerHTML = options;
+      projectFilterSelect.innerHTML = `<option value="">Todos</option>${options}`;
+    }
+
+    async function loadTasks() {
+      const projectId = projectFilterSelect.value;
+      const status = document.querySelector('#task-status-filter').value;
+      const title = document.querySelector('#task-title-filter').value.trim();
+      const query = new URLSearchParams();
+      if (projectId) query.set('project_id', projectId);
+      if (status) query.set('status', status);
+      if (title) query.set('title', title);
+      const tasks = await fetchJson(`/tasks?${query.toString()}`);
+
+      taskTableBody.innerHTML = tasks.map(t => `
+        <tr>
+          <td>${t.title}</td>
+          <td>${t.description || ''}</td>
+          <td>${t.project_id}</td>
+          <td>${t.status}</td>
+          <td>${formatDate(t.due_date)}</td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('login-form').addEventListener('submit', event => {
+      event.preventDefault();
+      const user = document.getElementById('login-user').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (user === validUser && password === validPassword) {
+        loginError.textContent = '';
+        setAuth(true);
+        loadProjects().catch(() => showMessage('Error cargando proyectos.', 'error'));
+        loadTasks().catch(() => showMessage('Error cargando tareas.', 'error'));
+      } else {
+        loginError.textContent = 'usuario y/o password no válidos';
+      }
+    });
+
+    logoutButton.addEventListener('click', () => {
+      setAuth(false);
+      document.getElementById('login-form').reset();
+    });
+
+    document.querySelector('#project-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const name = document.querySelector('#project-name').value.trim();
+      const description = document.querySelector('#project-description').value.trim();
+      const status = document.querySelector('#project-status').value;
+      try {
+        await fetchJson('/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description, status, metadata: {} }),
+        });
+        showMessage('Proyecto creado correctamente.');
+        event.target.reset();
+        await loadProjects();
+      } catch (error) {
+        showMessage(error.message, 'error');
+      }
+    });
+
+    document.querySelector('#task-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const project_id = projectSelect.value;
+      const title = document.querySelector('#task-title').value.trim();
+      const description = document.querySelector('#task-description').value.trim();
+      const status = document.querySelector('#task-status').value;
+      const due_date = document.querySelector('#task-due-date').value ? new Date(document.querySelector('#task-due-date').value).toISOString() : undefined;
+      const metadataText = document.querySelector('#task-metadata').value.trim();
+      let metadata = {};
+      if (metadataText) {
+        try {
+          metadata = JSON.parse(metadataText);
+        } catch (err) {
+          return showMessage('Metadata inválida, debe ser JSON.', 'error');
+        }
+      }
+      try {
+        await fetchJson('/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ project_id, title, description, status, due_date, metadata }),
+        });
+        showMessage('Tarea creada correctamente.');
+        event.target.reset();
+        await loadTasks();
+      } catch (error) {
+        showMessage(error.message, 'error');
+      }
+    });
+
+    document.querySelector('#refresh-projects').addEventListener('click', loadProjects);
+    document.querySelector('#refresh-tasks').addEventListener('click', loadTasks);
+    document.querySelector('#apply-filters').addEventListener('click', async event => {
+      event.preventDefault();
+      await loadTasks();
+    });
+
+    window.addEventListener('load', async () => {
+      if (isAuthenticated()) {
+        setAuth(true);
+        await loadProjects();
+        await loadTasks();
+      } else {
+        setAuth(false);
+      }
+    });
+  </script>
+</body>
+</html>

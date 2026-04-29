@@ -1,0 +1,211 @@
+Introducción 
+El desarrollo de software en la actualidad exige soluciones eficientes para la gestión de proyectos informáticos, debido a la creciente complejidad de los sistemas y la necesidad de coordinación entre múltiples actores. En este contexto, la correcta administración de tareas, recursos y tiempos se vuelve un elemento crítico para el éxito organizacional.
+
+El presente informe tiene como propósito diseñar la planificación de una API backend orientada a la gestión de proyectos informáticos, utilizando MongoDB como sistema de persistencia de datos NoSQL. Se abordan aspectos de negocio, arquitectura, modelo de datos y decisiones tecnológicas.
+
+El alcance del trabajo corresponde únicamente a la fase de diseño y planificación, sin considerar implementación. Se aplican metodologías como MoSCoW y MVP, junto con estándares modernos como OpenTelemetry y Swagger.
+
+
+
+
+Problema o necesidad del negocio
+Desde la perspectiva del Product Owner, se identifica que las pequeñas y medianas empresas presentan dificultades en la gestión de proyectos informáticos debido a la ausencia de herramientas centralizadas que permitan visualizar el estado de avance de las tareas.
+
+El principal dolor del usuario radica en la falta de trazabilidad y control, lo que provoca retrasos en la entrega de proyectos, duplicidad de trabajo y baja productividad del equipo.
+
+Este problema impacta directamente en el negocio, generando pérdidas de tiempo, aumento de costos operacionales y disminución en la calidad del servicio entregado.
+
+•	Los stakeholders involucrados son:
+•	Jefes de proyecto 
+•	Desarrolladores 
+•	Clientes finales 
+
+La oportunidad detectada consiste en implementar una solución tecnológica que permita centralizar la información y mejorar la toma de decisiones mediante el uso de una API.
+
+
+Solución y alcance
+La solución propuesta consiste en el desarrollo de una API RESTful que funcione como backend de un sistema de gestión de proyectos informáticos. Esta API permitirá manejar la información de manera estructurada, asegurando integridad y disponibilidad de los datos.
+La API permitirá realizar operaciones CRUD sobre las entidades principales, así como también consultas más complejas como filtrado por estado, búsqueda por nombre o listado de tareas por proyecto.
+Adicionalmente, se considerará el uso de buenas prácticas como validación de datos, manejo de errores y respuestas estandarizadas (HTTP status codes).
+Alcance ampliado:
+•	Implementación de endpoints REST 
+•	Manejo de errores centralizado 
+•	Validación de datos (ej: campos obligatorios) 
+•	Estructura escalable del código 
+•	Preparación para integración con frontend futuro 
+Esto asegura que la API no solo funcione, sino que también sea mantenible y escalable en el tiempo.
+Alcance (completo):
+•	Incluye: gestión de proyectos, tareas, consultas 
+•	No incluye: frontend, notificaciones, IA 
+Restricciones:
+•	Uso de MongoDB obligatorio 
+•	Solo backend 
+•	Tiempo limitado académico 
+Stakeholders:
+•	PO, Devs, Usuarios
+
+
+
+MoSCow
+El método MoSCoW permite definir claramente las prioridades del proyecto, lo que es clave en entornos con recursos limitados.
+
+Must:
+•	CRUD proyectos → necesario para funcionamiento base 
+•	CRUD tareas → sin esto no hay gestión 
+•	MongoDB → requisito técnico 
+Should:
+•	Validaciones → evita errores 
+•	Logs → mejora monitoreo 
+Could:
+•	Usuarios → mejora escalabilidad futura 
+Won’t:
+•	Frontend → fuera del alcance 
+•	Notificaciones → complejidad innecesaria
+
+
+
+
+MVP
+El MVP se enfoca en entregar una versión funcional del sistema en el menor tiempo posible, con el objetivo de validar la solución frente al problema planteado.
+En este proyecto, el MVP incluirá endpoints básicos para gestionar proyectos y tareas, asegurando persistencia de datos en MongoDB.
+Un aspecto importante del MVP es que ya incorpora buenas prácticas como documentación (Swagger) y pruebas, lo que lo diferencia de un simple prototipo.
+Además, el MVP servirá como base para futuras iteraciones, permitiendo agregar nuevas funcionalidades sin rehacer el sistema.
+
+El MVP se define directamente a partir de los elementos Must, ya que estos representan el núcleo funcional del sistema.
+
+
+
+
+Stack
+La elección del stack tecnológico es clave para el éxito del proyecto, ya que influye directamente en el rendimiento, escalabilidad y mantenibilidad.
+Stack MVP 
+•	Node.js + Express:
+Permite construir APIs de forma rápida y eficiente. Su modelo asíncrono es ideal para manejar múltiples solicitudes concurrentes. 
+•	MongoDB Atlas:
+Al ser una base de datos NoSQL, permite almacenar datos sin un esquema rígido, lo que es útil en etapas iniciales donde los requerimientos pueden cambiar. Además, soporta alta escalabilidad horizontal. 
+•	Mongoose (ODM):
+Facilita la interacción con MongoDB mediante modelos y esquemas, mejorando la validación de datos. 
+•	Swagger:
+Permite generar documentación interactiva, lo cual es fundamental para pruebas y colaboración. 
+•	OpenTelemetry:
+Proporciona trazabilidad y monitoreo, permitiendo analizar el rendimiento del sistema. 
+•	Jest / Supertest:
+Permiten automatizar pruebas, asegurando la calidad del código. 
+•	Render:
+Ofrece despliegue rápido y gratuito, ideal para proyectos académicos.
+Stack Proyecto Final 
+•	NestJS:
+Framework estructurado basado en TypeScript, ideal para proyectos grandes. 
+•	Docker:
+Permite crear entornos reproducibles, evitando problemas de compatibilidad. 
+•	CI/CD:
+Automatiza pruebas y despliegues, mejorando la eficiencia del desarrollo. 
+•	Caching (Redis - opcional):
+Podría implementarse para mejorar el rendimiento en consultas frecuentes.
+•	Alternativa descartada: 
+Se descartó el uso de Spring Boot debido a su mayor complejidad para un MVP.
+
+
+Infraestructura
+La infraestructura está basada en arquitectura cloud, lo que permite alta disponibilidad y escalabilidad.
+Componentes:
+•	API desplegada en Render 
+•	Base de datos en MongoDB Atlas 
+•	Repositorio en GitHub 
+Se implementará una arquitectura cliente-servidor, donde el cliente consume la API mediante HTTP.
+También se considerará el uso de variables de entorno para manejar configuraciones sensibles como credenciales de base de datos
+
+Definición de la base de datos (MongoDB)
+El modelo de datos se basa en documentos JSON, lo cual permite representar estructuras complejas de manera flexible.
+Se utilizará una estrategia de referencia entre colecciones (normalización parcial), donde las tareas contienen el ID del proyecto.
+Además, se pueden agregar índices para mejorar el rendimiento de consultas, especialmente en campos como nombre o estado.
+Esto demuestra el uso de conceptos clave de bases de datos NoSQL como:
+•	Flexibilidad de esquema 
+•	Escalabilidad 
+•	Alto rendimiento en lecturas/escrituras
+
+Tipo relación: 1:N (proyecto → tareas) 
+Decisión: 
+•	Referenciado (no embebido) 
+•	Porque hay muchas tareas
+Se opta por un modelo referenciado en lugar de embebido, debido a la alta cardinalidad entre proyectos y tareas, lo que evita duplicación de datos y mejora la escalabilidad.
+
+Para el MVP se utiliza Render debido a su costo cero y facilidad de despliegue, mientras que para producción se podría migrar a AWS o GCP, los cuales ofrecen mejores SLA (Service Level Agreement) y escalabilidad.
+MongoDB Atlas permite seleccionar regiones cercanas (ej: Sudamérica), lo que mejora la latencia.
+Se opta por modelo PaaS, reduciendo la carga operativa.
+
+Arquitectura
+La arquitectura en capas permite separar responsabilidades, lo que facilita el mantenimiento del sistema.
+También se puede considerar el uso de arquitectura basada en servicios, donde cada módulo (proyectos, tareas) está desacoplado.
+A futuro, esto podría evolucionar a una arquitectura de microservicios.
+Ejemplo EndPoint
+GET /api/v1/proyectos
+Response: 200 OK
+[
+  { "id": "...", "nombre": "Proyecto 1" }
+]
+
+Framework
+Express.js es ideal para comenzar debido a su simplicidad. Sin embargo, no impone una estructura definida, lo que puede ser un problema en proyectos grandes.
+Por esta razón, se evalúa NestJS como alternativa futura, ya que aplica principios como inyección de dependencias y modularidad.
+
+Estándares
+El uso de estándares es fundamental para garantizar calidad y profesionalismo.
+•	Swagger: mejora la comunicación entre desarrolladores 
+•	OpenTelemetry: Se implementarán trazas para cada request, logs de errores y métricas de latencia utilizando herramientas como Jaeger o Grafana. 
+•	Coverage: Se define un umbral mínimo de 80% en CI/CD, bloqueando merges si no se cumple 
+•	Buenas prácticas REST: uso correcto de métodos HTTP (GET, POST, PUT, DELETE) 
+También se aplicarán convenciones como:
+•	Nombres consistentes en endpoints 
+•	Respuestas en formato JSON 
+•	Manejo de errores estructurado
+
+Manejo de versiones
+El versionado permite evolucionar la API sin afectar a los clientes existentes.
+Ejemplo:
+•	v1: funcionalidades básicas 
+•	v2: autenticación y usuarios 
+•	v3: optimización y nuevas features 
+Esto es clave en entornos reales donde múltiples aplicaciones consumen la API.
+
+Pruebas
+Se implementarán distintos tipos de pruebas:
+•	Pruebas unitarias: validan funciones individuales 
+•	Pruebas de integración: validan endpoints completos 
+•	Pruebas de API: verifican respuestas HTTP 
+La meta de cobertura ≥ 80% asegura que el sistema ha sido correctamente validado.
+Además, los logs de OpenTelemetry permitirán detectar errores en producción.
+
+
+
+
+Conclusión
+El desarrollo de esta API representa una solución moderna y escalable para la gestión de proyectos informáticos. A través del uso de tecnologías NoSQL como MongoDB, se logra una mayor flexibilidad en el manejo de datos.
+El enfoque basado en MVP permite validar rápidamente la solución, mientras que metodologías como MoSCoW ayudan a priorizar el desarrollo.
+Además, la implementación de estándares y buenas prácticas asegura un producto de calidad, preparado para crecer y adaptarse a nuevas necesidades.
+Este proyecto permite integrar conocimientos de programación, bases de datos, arquitectura y metodologías ágiles, lo que es fundamental en la formación de un analista programador.
+
+En resumen, el proyecto API esta resumido en los siguientes aspectos del proyecto
+Problema:
+Falta de herramientas de gestión de proyectos
+Solución:
+API REST con MongoDB
+Tecnologías:
+Node.js, Express, MongoDB Atlas, Swagger, OpenTelemetry
+Arquitectura:
+Cliente → API → Base de datos
+Metodología:
+MVP + MoSCoW + SEMVER
+Infraestructura:
+Cloud (Render + MongoDB Atlas)
+Además, permite comunicar el proyecto de manera visual, facilitando su comprensión para audiencias técnicas y no técnicas.
+
+
+
+Bibliografía
+Fielding, R. T. (2000). Architectural styles and the design of network-based software architectures. University of California, Irvine.
+MongoDB Inc. (2024). MongoDB Atlas Documentation. https://www.mongodb.com/docs/atlas/
+OpenTelemetry. (2024). OpenTelemetry Documentation. https://opentelemetry.io/docs/
+Swagger. (2024). OpenAPI Specification. https://swagger.io/specification/
+Node.js Foundation. (2024). Node.js Documentation. https://nodejs.org/en/docs/
+Fowler, M. (2018). Patterns of Enterprise Application Architecture. Addison-Wesley.

@@ -34,3 +34,7 @@ uvicorn src.main:app --reload
 - Validar los requerimientos del documento Word.
 - Ajustar modelos de datos NoSQL según la base de datos no estructurada.
 - Añadir endpoints específicos del proyecto.
+
+## Planificación del desarrollo
+
+Consulta el documento de planificación completo en `API_PLAN.md` para ver el diseño de datos, los endpoints propuestos, las validaciones, la arquitectura y el plan de trabajo.

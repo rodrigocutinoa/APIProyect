@@ -100,6 +100,8 @@ tbody tr:hover {
   display: grid;
   gap: 12px;
   padding: 20px 24px 24px;
+  width: min(80vw, 850px);
+  margin: 0 auto;
 }
 
 .form-card h3 {

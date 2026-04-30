@@ -2,10 +2,11 @@ services:
   - type: web
     name: APIProyect
     env: python
-    pythonVersion: 3.12.18
     region: oregon
     plan: free
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.18
       - key: CARGO_HOME
         value: /tmp/.cargo
       - key: RUSTUP_HOME
